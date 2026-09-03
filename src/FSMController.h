@@ -40,7 +40,15 @@ public:
 	Move onUpdate(const GameState& gs) override;
 	void onEnter(const GameState& gs) override;
 	~ChaseState();
+};
 
+class FrightenedState : public FSMState {
+
+public:
+	FrightenedState(std::shared_ptr<Character> _character);
+	Move onUpdate(const GameState& gs) override;
+	void onEnter(const GameState& gs) override;
+	~FrightenedState();
 };
 
 class ExampleStateMachine: public FiniteStateMachine{

@@ -50,7 +50,7 @@ void GameState::updateGhosts(std::vector<Move> m) {
 			ghosts[i]->move(m[i],maze);
 		}
 		else{
-			std::cout<<"Ghost "<<i<<" issued an illegal move!\n";
+			// std::cout<<"Ghost "<<i<<" issued an illegal move!\n";
 			ghosts[i]->move(PASS,maze);
 		}
 		

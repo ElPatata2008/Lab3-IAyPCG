@@ -28,7 +28,6 @@ Move PacmanDTController::getMove(const GameState& game) {
 
     int ghostDist = 10000000;
     int ghostNum;
-    int ghostNode;
     std::pair<int, int> ghostCoord;
     
     int pacmanNode = character->getPos();
@@ -39,26 +38,17 @@ Move PacmanDTController::getMove(const GameState& game) {
         int node = game.getGhostsPos(i);
         auto coords = game.getMaze().getNodePos(node);
 
-        // coords.first -= pacmanCoord.first;
-        // coords.second -= pacmanCoord.second;
-
         int sqX = std::pow(coords.first - pacmanCoord.first, 2);
         int sqY = std::pow(coords.second - pacmanCoord.second, 2);
         int sqDist = std::sqrt(sqX + sqY);
 
          if (sqDist < ghostDist) {
             ghostDist = sqDist;
-            ghostNode = node;
             ghostCoord = coords;
             ghostNum = i;
          }
 
     }
-
-    std::cout << "Ghost Distance: " << ghostDist <<
-                ", Ghost Node: " << ghostNode <<
-                ", Ghost Coords: " << ghostCoord.first << ", " << ghostCoord.second <<
-                ", Ghost Num: " << ghostNum << std::endl;
 
     if (game.isGhostEdible(ghostNum)) {
         int minDist = 10000000;
@@ -70,9 +60,6 @@ Move PacmanDTController::getMove(const GameState& game) {
             if (neighbor < 0) continue;
             auto neighborCoords = game.getMaze().getNodePos(neighbor);
 
-            // neighborCoords.first -= ghostCoord.first;
-            // neighborCoords.second -= ghostCoord.second;
-
             int sqX = std::pow(neighborCoords.first - ghostCoord.first, 2);
             int sqY = std::pow(neighborCoords.second - ghostCoord.second, 2);
             int sqDist = std::sqrt(sqX + sqY);
@@ -80,7 +67,6 @@ Move PacmanDTController::getMove(const GameState& game) {
             if (sqDist < minDist) {
                 minDist = sqDist;
                 minMove = m;
-                // std::cout << "Best Move: " << m << std::endl;
             }
         }
 
@@ -95,9 +81,6 @@ Move PacmanDTController::getMove(const GameState& game) {
             int neighbor = game.getMaze().getNeighbour(pacmanNode, m);
             if (neighbor < 0) continue;
             auto neighborCoords = game.getMaze().getNodePos(neighbor);
-
-            // neighborCoords.first -= ghostCoord.first;
-            // neighborCoords.second -= ghostCoord.second;
 
             int sqX = std::pow(neighborCoords.first - ghostCoord.first, 2);
             int sqY = std::pow(neighborCoords.second - ghostCoord.second, 2);

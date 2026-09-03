@@ -28,8 +28,8 @@ void MsPacMan::die() {
 
 void MsPacMan::addScore(int points) {
 	score+=points;
-	if(!nogui)
-		std::cout<<"Score: "<<score<<std::endl;
+	// if(!nogui)
+	// 	std::cout<<"Score: "<<score<<std::endl;
 }
 
 int MsPacMan::getScore()const{
