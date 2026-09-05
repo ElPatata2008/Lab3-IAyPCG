@@ -57,7 +57,8 @@ public:
 class ChaseTransition : public FSMTransition {
 	std::shared_ptr<Character> _character;
 	std::shared_ptr<FSMState> _next;
-public:
+	public:
+	std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::_V2::system_clock::duration> _start;
 	ChaseTransition(std::shared_ptr<FSMState> next,  std::shared_ptr<Character> character);
 	bool isValid(const GameState& gs) override;
 	std::shared_ptr<FSMState> getNextState() override;
@@ -66,8 +67,8 @@ public:
 class ScatterTransition : public FSMTransition {
 	std::shared_ptr<Character> _character;
 	std::shared_ptr<FSMState> _next;
-	std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::_V2::system_clock::duration> _start = std::chrono::high_resolution_clock::now();
-public:
+	public:
+	std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::_V2::system_clock::duration> _start;
 	bool change = false;
 	ScatterTransition(std::shared_ptr<FSMState> next, std::shared_ptr<Character> character);
 	bool isValid(const GameState& gs) override;

@@ -14,13 +14,10 @@ FSMController::FSMController(std::shared_ptr<Character> character):
 	uniform_dist(0,3),
 	fsm(std::make_shared<ExampleStateMachine>(character)) {
 }
-
 FSMController::~FSMController() {
 	// TODO Auto-generated destructor stub
 }
-
-Move 
-FSMController::getMove(const GameState& game){
+Move FSMController::getMove(const GameState& game){
 	return fsm->update(game);
 }
 
@@ -43,7 +40,7 @@ NonFrightenedTransition::NonFrightenedTransition(std::shared_ptr<FSMState> next1
 bool NonFrightenedTransition::isValid(const GameState& gs) {
 	Ghost *ghost = dynamic_cast<Ghost*>(_character.get());
 	if (ghost->isEdible() == false){
-		switch (rand() % 1)
+		switch (rand() % 2)
 		{
 			case 0: _next = _next1; break;
 			case 1: _next = _next2; break;
@@ -67,8 +64,14 @@ std::shared_ptr<FSMState> FrightenedTransition::getNextState() { return _next; }
 
 ChaseTransition::ChaseTransition(std::shared_ptr<FSMState> next, std::shared_ptr<Character> character):_next(next), _character(character) {}
 bool ChaseTransition::isValid(const GameState& gs) {
-	
-	
+	auto end = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> diff = end - _start;
+	// std::cout << diff.count() << std::endl;
+	if (diff.count() > 7.0) {
+		// _start = std::chrono::high_resolution_clock::now();
+		return true;
+	}
+
 	return false;
 }
 std::shared_ptr<FSMState> ChaseTransition::getNextState() { return _next; }
@@ -76,32 +79,35 @@ std::shared_ptr<FSMState> ChaseTransition::getNextState() { return _next; }
 ScatterTransition::ScatterTransition(std::shared_ptr<FSMState> next, std::shared_ptr<Character> character):_next(next), _character(character) {}
 bool ScatterTransition::isValid(const GameState& gs) {
 
-	// std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-	// std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-	
-	auto timer = std::chrono::high_resolution_clock::now();
 	auto end = std::chrono::high_resolution_clock::now();
-	
-	std::chrono::duration<double> diff = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch().count()).count() ;
-	std::cout << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch().count()) << std::endl;
-
+	std::chrono::duration<double> diff = end - _start;
+	// std::cout << diff.count() << std::endl;
+	if (diff.count() > 20.0) {
+		// _start = std::chrono::high_resolution_clock::now();
+		return true;
+	}
 	return false;
 }
 std::shared_ptr<FSMState> ScatterTransition::getNextState() { 
-	_start = std::chrono::high_resolution_clock::now();
+	// _start = std::chrono::high_resolution_clock::now();
 	return _next; 
 }
 
 ///////////////////////////////ChaseState///////////////////////////////////////
 ChaseState::ChaseState(std::shared_ptr<Character> _character):FSMState(_character){ }
-
 void ChaseState::onEnter(const GameState& ){ 
 	std::cout << "Chasing..." << std::endl;
 
 	std::dynamic_pointer_cast<Ghost>(character)->revert(); 
-}
 
-Move ChaseState::onUpdate(const GameState& game){
+	for (auto& t : transitions) {
+		auto st = std::dynamic_pointer_cast<ScatterTransition>(t);
+		if (st) {
+			st->_start = std::chrono::high_resolution_clock::now();
+		}
+	}
+}
+Move ChaseState::onUpdate(const GameState& game) {
 	
 	std::vector<Move> moves;
 	const auto pacmanCoord=game.getMaze().getNodePos(game.getPacmanPos());
@@ -135,8 +141,16 @@ ScatterState::ScatterState(std::shared_ptr<Character> _character) : FSMState(_ch
 void ScatterState::onEnter(const GameState& ) {
 	std::cout << "Scattering..." << std::endl;
 	
+	for (auto& t : transitions) {
+		auto st = std::dynamic_pointer_cast<ChaseTransition>(t);
+		if (st) {
+			st->_start = std::chrono::high_resolution_clock::now();
+		}
+	}
+	
 }
 Move ScatterState:: onUpdate(const GameState& game) {
+
 	std::vector<Move> moves;
 	std::pair<int, int> corner = {-20, -20};
 	// const auto cornerCoord={-20, -20};
