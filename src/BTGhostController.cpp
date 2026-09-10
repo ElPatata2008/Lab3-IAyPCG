@@ -14,15 +14,26 @@ Info* Info::info=nullptr;
 
 BTGhostController::BTGhostController(std::shared_ptr<Character> character):Controller(character),root(std::make_shared<Selector>())  {
 
-	auto filter = std::make_shared<Filter>();
-	filter->addCondition(std::make_shared<Powerpill>()); 	// Condition
-	filter->addAction(std::make_shared<Frightened>()); 		// Action
-	root->addChild(filter);
+	auto filterFrightened = std::make_shared<Filter>();
+	filterFrightened->addCondition(std::make_shared<Powerpill>()); 	// Condition
+	filterFrightened->addAction(std::make_shared<Frightened>()); 		// Action
+	
+	auto timeout = std::make_shared<TimeOut>();
+
+	auto filterScatter = std::make_shared<Filter>();
+	filterScatter->addCondition(timeout);
+	filterScatter->addAction(std::make_shared<Scatter>());
+
+	auto filterChase = std::make_shared<Filter>();
+	filterChase->addCondition(std::make_shared<Invertor>(timeout));
+	filterChase->addAction(std::make_shared<Chase>());
+	
+	root->addChild(filterFrightened);
+	root->addChild(filterScatter);
+	root->addChild(filterChase);
 }
 
-BTGhostController::~BTGhostController() {
-	// TODO Auto-generated destructor stub
-}
+BTGhostController::~BTGhostController() { /* TODO Auto-generated destructor stub */ }
 
 Move BTGhostController::getMove(const GameState& gs){
 	Info::getInfo()->in_character=character;
@@ -32,11 +43,7 @@ Move BTGhostController::getMove(const GameState& gs){
 	return Info::getInfo()->out_move;
 }
 
-TimeOut::TimeOut() : Behavior() {
-	lastTime = std::chrono::high_resolution_clock::now();
-
-}
-
+TimeOut::TimeOut() : Behavior() { lastTime = std::chrono::high_resolution_clock::now(); }
 Status TimeOut::update(){
 	std::chrono::duration<float> timeStamp = std::chrono::high_resolution_clock::now() - lastTime;
 	if( (int)timeStamp.count()%27 < 7){
@@ -47,8 +54,9 @@ Status TimeOut::update(){
 
 }
 
+// Chase::onInitialize() {}
 Status Chase::update(){
-	//std::cerr << " Chase \n" ;
+	// std::cerr << " Chase \n" ;
 	auto character = Info::getInfo()->in_character;
 	auto gs = Info::getInfo()->in_gamestate;
 	auto target= gs->getMaze().getNodePos(gs->getPacmanPos());
@@ -75,6 +83,7 @@ Status Chase::update(){
 	return BH_SUCCESS;
 }
 
+
 Status Powerpill::update(){
 	auto character = Info::getInfo()->in_character;
 	auto ghost = dynamic_cast<Ghost*>(character.get());
@@ -87,12 +96,10 @@ Status Powerpill::update(){
 
 }
 
-Frightened::Frightened() : Behavior(), e(rand()), uniform_dist(0,3){
 
-}
-
+Frightened::Frightened() : Behavior(), e(rand()), uniform_dist(0,3){ }
 Status Frightened::update(){
-	//std::cerr << " Frightened \n" ;
+	// std::cerr << " Frightened \n" ;
 	auto character = Info::getInfo()->in_character;
 	auto gs = Info::getInfo()->in_gamestate;
 	std::vector<Move> moves;
@@ -106,13 +113,10 @@ Status Frightened::update(){
 	return BH_SUCCESS; //NO es as� pero por ahora
 }
 
-Scatter :: Scatter() : Behavior(){
-	target = std::make_pair(-1,-1);
 
-}
-
+Scatter :: Scatter() : Behavior(){ target = std::make_pair(-1,-1); }
 Status Scatter::update(){
-	//std::cerr << " Scatter \n" ;
+	// std::cerr << " Scatter \n" ;
 	if(target.first == -1){
 		target = Info::getInfo()->in_gamestate->getMaze().getPowerPillPositions()[0];
 	}

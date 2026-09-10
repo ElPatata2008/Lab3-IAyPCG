@@ -96,7 +96,7 @@ std::shared_ptr<FSMState> ScatterTransition::getNextState() {
 ///////////////////////////////ChaseState///////////////////////////////////////
 ChaseState::ChaseState(std::shared_ptr<Character> _character):FSMState(_character){ }
 void ChaseState::onEnter(const GameState& ){ 
-	std::cout << "Chasing..." << std::endl;
+	// std::cout << "Chasing..." << std::endl;
 
 	std::dynamic_pointer_cast<Ghost>(character)->revert(); 
 
@@ -139,7 +139,7 @@ ChaseState::~ChaseState(){}
 
 ScatterState::ScatterState(std::shared_ptr<Character> _character) : FSMState(_character) {}
 void ScatterState::onEnter(const GameState& ) {
-	std::cout << "Scattering..." << std::endl;
+	// std::cout << "Scattering..." << std::endl;
 	
 	for (auto& t : transitions) {
 		auto st = std::dynamic_pointer_cast<ChaseTransition>(t);
@@ -182,7 +182,7 @@ ScatterState::~ScatterState(){}
 
 FrightenedState::FrightenedState(std::shared_ptr<Character> _character) : FSMState(_character) {}
 void FrightenedState::onEnter(const GameState& ) { 
-	std::cout << "Escaping..." << std::endl;
+	// std::cout << "Escaping..." << std::endl;
 }
 Move FrightenedState::onUpdate(const GameState& game) {
 	// std::cout << "FrightenedState" << std::endl;

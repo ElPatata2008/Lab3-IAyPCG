@@ -97,14 +97,13 @@ protected:
 public:
     Decorator(std::shared_ptr<Behavior> child) : m_pChild(child) {}
 };
+
 // ============================================================================
+
 class Repeat : public Decorator
 {
 public:
-	Repeat(std::shared_ptr<Behavior> child)
-	:	Decorator(child)
-	{
-	}
+	Repeat(std::shared_ptr<Behavior> child) : Decorator(child) { }
 
     void setCount(int count)
     {
@@ -132,6 +131,20 @@ public:
 protected:
     int m_iLimit;
     int m_iCounter;
+};
+
+class Invertor : public Decorator {
+public: 
+    Invertor(std::shared_ptr<Behavior> child) : Decorator(child) {}
+
+    Status update() override {
+        m_pChild->tick();
+
+        if (m_pChild->getStatus() == BH_SUCCESS) return BH_FAILURE;
+        if (m_pChild->getStatus() == BH_FAILURE) return BH_SUCCESS;
+        if (m_pChild->getStatus() == BH_RUNNING) return BH_RUNNING;
+        return BH_INVALID;
+    }
 };
 
 // ============================================================================
@@ -195,6 +208,7 @@ public:
 		m_Children.push_back(action);
 	}
 };
+
 // ============================================================================
 
 class Selector : public Composite
@@ -234,6 +248,7 @@ protected:
 };
 
 // ============================================================================
+
 class Parallel : public Composite
 {
 public:
@@ -313,6 +328,7 @@ protected:
 };
 
 // ============================================================================
+
 class Monitor : public Parallel
 {
 public:
@@ -331,7 +347,6 @@ public:
         m_Children.push_back(action);
     }
 };
-
 
 // ============================================================================
 
