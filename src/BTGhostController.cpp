@@ -15,16 +15,16 @@ Info* Info::info=nullptr;
 BTGhostController::BTGhostController(std::shared_ptr<Character> character):Controller(character),root(std::make_shared<Selector>())  {
 
 	auto filterFrightened = std::make_shared<Filter>();
+	auto timeout = std::make_shared<TimeOut>();
+	auto filterScatter = std::make_shared<Filter>();
+	auto filterChase = std::make_shared<Filter>();
+	
 	filterFrightened->addCondition(std::make_shared<Powerpill>()); 	// Condition
 	filterFrightened->addAction(std::make_shared<Frightened>()); 		// Action
 	
-	auto timeout = std::make_shared<TimeOut>();
-
-	auto filterScatter = std::make_shared<Filter>();
 	filterScatter->addCondition(timeout);
 	filterScatter->addAction(std::make_shared<Scatter>());
 
-	auto filterChase = std::make_shared<Filter>();
 	filterChase->addCondition(std::make_shared<Invertor>(timeout));
 	filterChase->addAction(std::make_shared<Chase>());
 	
@@ -56,10 +56,24 @@ Status TimeOut::update(){
 
 // Chase::onInitialize() {}
 Status Chase::update(){
-	// std::cerr << " Chase \n" ;
+	std::cerr << " Chase \n" ;
 	auto character = Info::getInfo()->in_character;
 	auto gs = Info::getInfo()->in_gamestate;
-	auto target= gs->getMaze().getNodePos(gs->getPacmanPos());
+	
+	auto targetDir = gs->getPacmanDir();
+	Move m = static_cast<Move>(targetDir);
+	int targetPos = gs->getPacmanPos();
+	
+	for (int i = 0; i < 4; i++) {
+		int nextPos = gs->getMaze().getNeighbour(targetPos, m);
+		if (nextPos == -1) break;
+
+		targetPos = nextPos;
+	}
+	
+	auto target = gs->getMaze().getNodePos(targetPos);
+
+
 	float min=1000000000;
 	Move minMove=PASS;
 	std::vector<Move> moves;
@@ -99,7 +113,7 @@ Status Powerpill::update(){
 
 Frightened::Frightened() : Behavior(), e(rand()), uniform_dist(0,3){ }
 Status Frightened::update(){
-	// std::cerr << " Frightened \n" ;
+	std::cerr << " Frightened \n" ;
 	auto character = Info::getInfo()->in_character;
 	auto gs = Info::getInfo()->in_gamestate;
 	std::vector<Move> moves;
@@ -116,7 +130,7 @@ Status Frightened::update(){
 
 Scatter :: Scatter() : Behavior(){ target = std::make_pair(-1,-1); }
 Status Scatter::update(){
-	// std::cerr << " Scatter \n" ;
+	std::cerr << " Scatter \n" ;
 	if(target.first == -1){
 		target = Info::getInfo()->in_gamestate->getMaze().getPowerPillPositions()[0];
 	}
