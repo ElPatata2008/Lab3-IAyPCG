@@ -16,6 +16,8 @@ bool nogui=false;
 
 int main(int argc, char *argv[]) {
 
+	srand(static_cast<unsigned int>(time(nullptr))); // Aleatoriedad :D
+
 	if(argc>1 && std::string(argv[1])==std::string("quick")){
 		quick=true;
 	}

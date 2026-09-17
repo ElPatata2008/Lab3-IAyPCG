@@ -143,6 +143,7 @@ public:
         if (m_pChild->getStatus() == BH_SUCCESS) return BH_FAILURE;
         if (m_pChild->getStatus() == BH_FAILURE) return BH_SUCCESS;
         if (m_pChild->getStatus() == BH_RUNNING) return BH_RUNNING;
+        
         return BH_INVALID;
     }
 };

@@ -31,10 +31,12 @@ void GameState::updatePacman(Move m) {
 	if(maze.hasPill(newPos)){
 		maze.eatPill(newPos);
 		pacman->addScore(10);
+		pillsEaten++;
 	}
 	if(maze.hasPowerPill(newPos)){
 		maze.eatPowerPill(newPos);
 		pacman->addScore(50);
+		powerPillsEaten++;
 		for(auto &ghost:ghosts){
 			ghost->setEdible();
 		}
@@ -63,6 +65,7 @@ void GameState::updateEaten(){
 			if(ghosts[i]->isEdible()){
 				ghosts[i]->die();
 				pacman->addScore(400);
+				ghostsEaten++;
 			}else{
 				pacman->die();
 			}

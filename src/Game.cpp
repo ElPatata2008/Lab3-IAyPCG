@@ -31,7 +31,8 @@ gv(std::make_unique<GameView>(std::vector<std::string>{"images/maze-a.png","imag
 
 	auto pacman=std::make_shared<MsPacMan>(gameState.getMaze().getPacmanStart());
 	gameState.addPacMan(pacman);
-	pacmanControl=std::make_shared<KeyboardController>(pacman);
+	// pacmanControl=std::make_shared<KeyboardController>(pacman);
+	pacmanControl=std::make_shared<PacmanController>(pacman);
 	// pacmanControl=std::make_shared<PacmanDTController>(pacman);
 	
 	std::vector<std::shared_ptr<Ghost>> ghosts;
@@ -41,15 +42,15 @@ gv(std::make_unique<GameView>(std::vector<std::string>{"images/maze-a.png","imag
 	}
 	gameState.addGhosts(ghosts);
 
-	ghostsControl.push_back(std::make_shared<SimpleController>(ghosts[0]));
-	ghostsControl.push_back(std::make_shared<FSMController>(ghosts[1]));
-	ghostsControl.push_back(std::make_shared<BTGhostController>(ghosts[2]));
-	ghostsControl.push_back(std::make_shared<RandomController>(ghosts[3]));
+	// ghostsControl.push_back(std::make_shared<SimpleController>(ghosts[0]));
+	// ghostsControl.push_back(std::make_shared<RandomController>(ghosts[1]));
+	// ghostsControl.push_back(std::make_shared<BTGhostController>(ghosts[2]));
+	// ghostsControl.push_back(std::make_shared<SimpleController>(ghosts[3]));
 
-	//  ghostsControl.push_back(std::make_shared<BlinkyController>(ghosts[0])); 	// implementar
-	//  ghostsControl.push_back(std::make_shared<InkyController>(ghosts[1])); 		// implementar
-	//  ghostsControl.push_back(std::make_shared<PinkyController>(ghosts[2]));		// implementar
-	//  ghostsControl.push_back(std::make_shared<SueController>(ghosts[3]));		// implementar
+	 ghostsControl.push_back(std::make_shared<BlinkyController>(ghosts[0])); 	// implementar
+	 ghostsControl.push_back(std::make_shared<InkyController>(ghosts[1])); 		// implementar
+	 ghostsControl.push_back(std::make_shared<PinkyController>(ghosts[2]));		// implementar
+	 ghostsControl.push_back(std::make_shared<SueController>(ghosts[3]));		// implementar
 }
 
 const int NOSCORELIMIT = 10000;
@@ -71,6 +72,9 @@ void Game::run(){
 		}else if(gameState.lost()){
 			if(!nogui){
 				std::cout<<"Aborting because of no progress."<<std::endl;
+				std::cout << "Pills: " << gameState.getPillsEaten() << std::endl;
+				std::cout << "Power Pills: " << gameState.getPowerPillsEaten() << std::endl;
+				std::cout << "Ghosts: " << gameState.getGhostsEaten() << std::endl;
 				std::cout<<"Final score: "<<lastScore<<std::endl;
 			}else{
 				std::cout<<lastScore<<std::endl;
