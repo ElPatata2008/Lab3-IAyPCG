@@ -55,14 +55,6 @@ public:
 	InkyScatter();
 };
 
-class InkyCenter : public Behavior {
-private: 
-	std::pair<int, int> target;
-public: 
-	virtual Status update() override;
-	InkyCenter();
-};
-
 #pragma endregion
 
 #pragma region Conditions
@@ -79,22 +71,6 @@ public:
 	virtual Status update() override;
 	InkyTimeOut ();
 	float elapsedTime() const;
-};
-
-class InkyScatterMode : public Behavior {
-private:
-	std::shared_ptr<InkyTimeOut> _timer;
-public:
-	InkyScatterMode(std::shared_ptr<InkyTimeOut> timer);
-	virtual Status update() override;
-};
-
-class InkyCenterMode : public Behavior {
-private:
-	std::shared_ptr<InkyTimeOut> _timer;
-public:
-	InkyCenterMode(std::shared_ptr<InkyTimeOut> timer);
-	virtual Status update() override;
 };
 
 #pragma endregion

@@ -4,9 +4,6 @@
 int SueCS = 1;
 int SueCowardnessRadius = 200;
 
-std::chrono::time_point<std::chrono::high_resolution_clock> sueGuardCycleStart = std::chrono::high_resolution_clock::now();
-std::pair<int, int> sueGuardTarget = {-1, -1};
-
 SueController::SueController(std::shared_ptr<Character> character):
 	Controller(character),
 	e(rand()),
@@ -26,7 +23,7 @@ bool SueFrightenedTransition::isValid(const GameState& gs) {
 }
 std::shared_ptr<FSMState> SueFrightenedTransition::getNextState() { return _next; }
 
-SueUnfrightTransition::SueUnfrightTransition(std::shared_ptr<FSMState> next1, std::shared_ptr<FSMState> next2, std::shared_ptr<FSMState> next3, std::shared_ptr<Character> character): _next1(next1), _next2(next2), _next3(next3), _character(character) {}
+SueUnfrightTransition::SueUnfrightTransition(std::shared_ptr<FSMState> next1, std::shared_ptr<FSMState> next2, std::shared_ptr<Character> character): _next1(next1), _next2(next2), _character(character) {}
 bool SueUnfrightTransition::isValid(const GameState& gs) {
 	Ghost *ghost = dynamic_cast<Ghost*>(_character.get());
 	if (ghost->isEdible() == false) { return true; }
@@ -37,7 +34,6 @@ std::shared_ptr<FSMState> SueUnfrightTransition::getNextState() {
 	{
 		case 1: return _next1; break;
 		case 2: return _next2; break;
-		case 3: return _next3; break;
 		
 		default: return _next1; break; 
 	}
@@ -72,31 +68,6 @@ bool SueScatterTransition::isValid(const GameState& gs) {
 	return false;
 }
 std::shared_ptr<FSMState> SueScatterTransition::getNextState() { return _next; }
-
-SueGuardTransition::SueGuardTransition(std::shared_ptr<FSMState> next, std::shared_ptr<Character> character):_next(next), _character(character) {}
-bool SueGuardTransition::isValid(const GameState& gs) {
-	Ghost *ghost = dynamic_cast<Ghost*>(_character.get());
-	if (ghost->isEdible()) return false;
-	if (gs.getMaze().getPowerPillPositions().empty()) return false;
-
-	auto diff = std::chrono::high_resolution_clock::now() - sueGuardCycleStart;
-	return diff.count() > 20;
-}
-std::shared_ptr<FSMState> SueGuardTransition::getNextState() { return _next; }
-
-SueUnguardTransition::SueUnguardTransition(std::shared_ptr<FSMState> next1, std::shared_ptr<FSMState> next2, std::shared_ptr<Character> character):_next1(next1), _next2(next2), _character(character) {}
-bool SueUnguardTransition::isValid(const GameState& gs) {
-	auto pps = gs.getMaze().getPowerPillPositions();
-	bool stillthere = std::find(pps.begin(), pps.end(), sueGuardTarget) != pps.end();
-	auto diff = std::chrono::high_resolution_clock::now() - _start;
-
-	auto myCoord = gs.getMaze().getNodePos(_character->getPos());
-	auto pacmanCoord = gs.getMaze().getNodePos(gs.getPacmanPos());
-	state = euclid2(myCoord, pacmanCoord) > SueCowardnessRadius ? 1 : 2;
-
-	return pps.empty() || !stillthere || diff.count() > 15.0;
-}
-std::shared_ptr<FSMState> SueUnguardTransition::getNextState() { return state == 1 ? _next1 : _next2; }
 
 #pragma endregion
 
@@ -174,50 +145,6 @@ Move SueScatterState::onUpdate(const GameState& game) {
 }
 SueScatterState::~SueScatterState(){}
 
-SueGuardState::SueGuardState(std::shared_ptr<Character> _character) : FSMState(_character) {}
-void SueGuardState::onEnter(const GameState& gs) {
-	// std::cout << "Sue Scattering..." << std::endl;
-
-	SueCS = 3;	
-
-	auto myCoord = gs.getMaze().getNodePos(character->getPos());
-	auto pps = gs.getMaze().getPowerPillPositions();
-
-	target = *std::min_element(pps.begin(), pps.end(), [&](auto &a, auto &b) {
-		return euclid2(myCoord, a) < euclid2(myCoord, b);
-	});
-
-	sueGuardTarget = target;
-	sueGuardCycleStart = std::chrono::high_resolution_clock::now();
-
-}
-Move SueGuardState::onUpdate(const GameState& game) {
-	std::vector<Move> moves;
-	const auto myPos=character->getPos();
-
-	if(character->getDirection()==PASS){
-		moves=game.getMaze().getPossibleMoves(myPos);
-	}else{
-		moves=game.getMaze().getGhostLegalMoves(myPos,character->getDirection());
-	}
-
-	float min= moves[0] == PASS ? 10000000 : euclid2(
-		game.getMaze().getNodePos(game.getMaze().getNeighbour(myPos,moves[0])),
-			target);
-	int minI=0;
-	for(unsigned int i=1;i<moves.size();i++){
-		auto dist=euclid2(
-			game.getMaze().getNodePos(game.getMaze().getNeighbour(myPos,moves[i])),
-			target);
-		if(dist<min){
-			min=dist;
-			minI=i;
-		}
-	}
-	return moves[minI];
-}
-SueGuardState::~SueGuardState(){}
-
 SueFrightenedState::SueFrightenedState(std::shared_ptr<Character> _character) : FSMState(_character) {}
 void SueFrightenedState::onEnter(const GameState& ) {
 	// std::cout << "Sue Escaping..." << std::endl; 
@@ -257,14 +184,10 @@ SueFrightenedState::~SueFrightenedState(){}
 
 SueStateMachine::SueStateMachine(std::shared_ptr<Character> _character) : FiniteStateMachine(_character) {
 	auto chaseState = std::make_shared<SueChaseState>(character);
-	auto guardState = std::make_shared<SueGuardState>(character);
 	auto scatterState = std::make_shared<SueScatterState>(character);
 	auto frightenedState = std::make_shared<SueFrightenedState>(character);
 
-	frightenedState->addTransition(std::make_shared<SueUnfrightTransition>(chaseState, scatterState, guardState, character));
-
-	guardState->addTransition(std::make_shared<SueFrightenedTransition>(frightenedState, character));
-	guardState->addTransition(std::make_shared<SueUnguardTransition>(chaseState, scatterState, character));
+	frightenedState->addTransition(std::make_shared<SueUnfrightTransition>(chaseState, scatterState, character));
 
 	chaseState->addTransition(std::make_shared<SueFrightenedTransition>(frightenedState, character));
 	chaseState->addTransition(std::make_shared<SueScatterTransition>(scatterState, character));
@@ -275,7 +198,6 @@ SueStateMachine::SueStateMachine(std::shared_ptr<Character> _character) : Finite
 	states.push_back(chaseState);
 	states.push_back(scatterState);
 	states.push_back(frightenedState);
-	states.push_back(guardState);
 
 	initialState = chaseState;
 	activeState = initialState;

@@ -33,24 +33,12 @@ class BlinkyUnfrightTransition : public FSMTransition {
 	std::shared_ptr<Character> _character;
 	std::shared_ptr<FSMState> _next1;
 	std::shared_ptr<FSMState> _next2;
-	std::shared_ptr<FSMState> _next3;
 public: 
 	BlinkyUnfrightTransition(
 		std::shared_ptr<FSMState> next1, 
 		std::shared_ptr<FSMState> next2, 
-		std::shared_ptr<FSMState> next3, 
 		std::shared_ptr<Character> character
 	);
-	bool isValid(const GameState& gs) override;
-	std::shared_ptr<FSMState> getNextState() override;
-};
-
-class BlinkyTimeTransition : public FSMTransition {
-	std::shared_ptr<Character> _character;
-	std::shared_ptr<FSMState> _next;
-public:
-	std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::_V2::system_clock::duration> _start;
-	BlinkyTimeTransition(std::shared_ptr<FSMState> next, std::shared_ptr<Character> character);
 	bool isValid(const GameState& gs) override;
 	std::shared_ptr<FSMState> getNextState() override;
 };
@@ -74,27 +62,6 @@ class BlinkyScatterTransition : public FSMTransition {
 	bool isValid(const GameState& gs) override;
 	std::shared_ptr<FSMState> getNextState() override;
 };
-
-class BlinkyGuardTransition : public FSMTransition {
-	std::shared_ptr<Character> _character;
-	std::shared_ptr<FSMState> _next;
-	public:
-	std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::_V2::system_clock::duration> _start;
-	BlinkyGuardTransition(std::shared_ptr<FSMState> next, std::shared_ptr<Character> character);
-	bool isValid(const GameState& gs) override;
-	std::shared_ptr<FSMState> getNextState() override;
-};
-
-class BlinkyUnguardTransition : public FSMTransition {
-	std::shared_ptr<Character> _character;
-	std::shared_ptr<FSMState> _next;
-	public:
-	std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::_V2::system_clock::duration> _start;
-	BlinkyUnguardTransition(std::shared_ptr<FSMState> next, std::shared_ptr<Character> character);
-	bool isValid(const GameState& gs) override;
-	std::shared_ptr<FSMState> getNextState() override;
-};
-
 
 #pragma endregion
 
@@ -125,16 +92,6 @@ public:
 	Move onUpdate(const GameState& gs) override;
 	void onEnter(const GameState& gs) override;
 	~BlinkyChaseState();
-};
-
-class BlinkyGuardState : public FSMState {
-private:
-	std::pair<int, int> target;
-public: 
-	BlinkyGuardState(std::shared_ptr<Character> character);
-	Move onUpdate(const GameState& gs) override;
-	void onEnter(const GameState& gs) override;
-	~BlinkyGuardState();
 };
 
 #pragma endregion

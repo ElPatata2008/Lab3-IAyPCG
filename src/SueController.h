@@ -33,31 +33,8 @@ class SueUnfrightTransition : public FSMTransition {
 	std::shared_ptr<Character> _character;
 	std::shared_ptr<FSMState> _next1;
 	std::shared_ptr<FSMState> _next2;
-	std::shared_ptr<FSMState> _next3;
 public: 
-	SueUnfrightTransition(std::shared_ptr<FSMState> next1, std::shared_ptr<FSMState> next2, std::shared_ptr<FSMState> next3, std::shared_ptr<Character> character);
-	bool isValid(const GameState& gs) override;
-	std::shared_ptr<FSMState> getNextState() override;
-};
-
-class SueGuardTransition : public FSMTransition {
-	std::shared_ptr<Character> _character;
-	std::shared_ptr<FSMState> _next;
-public:
-	std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::_V2::system_clock::duration> _start;
-	SueGuardTransition(std::shared_ptr<FSMState> next, std::shared_ptr<Character> character);
-	bool isValid(const GameState& gs) override;
-	std::shared_ptr<FSMState> getNextState() override;
-};
-
-class SueUnguardTransition : public FSMTransition {
-	std::shared_ptr<Character> _character;
-	std::shared_ptr<FSMState> _next1;
-	std::shared_ptr<FSMState> _next2;
-	int state = 1;
-public:
-	std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::_V2::system_clock::duration> _start;
-	SueUnguardTransition(std::shared_ptr<FSMState> next1, std::shared_ptr<FSMState> next2, std::shared_ptr<Character> character);
+	SueUnfrightTransition(std::shared_ptr<FSMState> next1, std::shared_ptr<FSMState> next2, std::shared_ptr<Character> character);
 	bool isValid(const GameState& gs) override;
 	std::shared_ptr<FSMState> getNextState() override;
 };
@@ -100,16 +77,6 @@ public:
 	Move onUpdate(const GameState& gs) override;
 	void onEnter(const GameState& gs) override;
 	~SueScatterState();
-};
-
-class SueGuardState : public FSMState {
-private:
-	std::pair<int, int> target;
-public: 
-	SueGuardState(std::shared_ptr<Character> character);
-	Move onUpdate(const GameState& gs) override;
-	void onEnter(const GameState& gs) override;
-	~SueGuardState();
 };
 
 class SueChaseState : public FSMState {
